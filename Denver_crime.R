@@ -79,6 +79,7 @@ test$REPORTED_MONTH<-month(test$REPORTED_DATE, test)
 ## General Plots ## 
 test$REPORTED_YEAR <- as.factor(test$REPORTED_YEAR)
 test$DISTRICT_ID <- as.factor(test$DISTRICT_ID)
+test$REPORTED_DATE <- as.factor(test$REPORTED_DATE)
 
 cleaned <- test %>% select(REPORTED_YEAR,IS_CRIME, DISTRICT_ID)
 cleaned <- cleaned %>% group_by(REPORTED_YEAR,DISTRICT_ID) %>% summarise(CRIME = sum(IS_CRIME))
@@ -92,6 +93,11 @@ traffic <- traffic %>% group_by(REPORTED_YEAR, DISTRICT_ID) %>% summarise(TRAFFI
 
 ggplot(traffic,aes(x= REPORTED_YEAR, y= TRAFFIC, group=DISTRICT_ID)) + geom_point(aes(color=DISTRICT_ID)) + geom_line(aes(color = DISTRICT_ID))
 
+all_dates <- test %>% select(REPORTED_DATE, IS_CRIME, DISTRICT_ID) %>% group_by(REPORTED_DATE, DISTRICT_ID) %>% 
+  summarise(CRIME = sum(IS_CRIME))
+
+
+ggplot(all_dates,aes(x= REPORTED_DATE, y= CRIME)) + geom_area(aes(color= DISTRICT_ID, fill = DISTRICT_ID), alpha= .5)
 
 ## Mapping to a map ## 
 setwd("C:/Users/p/Documents/R Programming/denver-crime-data/Maps")
