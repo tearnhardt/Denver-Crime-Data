@@ -9,6 +9,7 @@
 library(tidyverse)
 library(dplyr)
 library(maptools)
+library(sf)
 
 
 ## Directories ## 
@@ -101,4 +102,8 @@ ggplot(all_dates,aes(x= REPORTED_DATE, y= CRIME)) + geom_area(aes(color= DISTRIC
 
 ## Mapping to a map ## 
 setwd("C:/Users/p/Documents/R Programming/denver-crime-data/Maps")
-map <- sf::st_read("crime.shp")
+map <- sf::st_read("county_boundary.shp")
+
+pdf("Map.pdf")
+ggplot() + geom_sf(data = map, color = "black", fill = "red") + coord_sf()
+dev.off()
