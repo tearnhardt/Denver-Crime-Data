@@ -99,7 +99,7 @@ all_dates <- test %>% select(REPORTED_DATE, IS_CRIME, DISTRICT_ID) %>% group_by(
 
 
 ggplot(all_dates,aes(x= REPORTED_DATE, y= CRIME)) + geom_area(aes(color= DISTRICT_ID, fill = DISTRICT_ID), alpha= .5)
-
+ 
 ## Mapping to a map ## 
 setwd("C:/Users/p/Documents/R Programming/denver-crime-data/Maps")
 map <- sf::st_read("county_boundary.shp")
