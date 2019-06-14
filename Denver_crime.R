@@ -10,10 +10,15 @@ library(tidyverse)
 library(dplyr)
 library(maptools)
 library(sf)
+library(leaflet)
+library(geojsonio)
+library(htmlwidgets)
+library(htmltools)
+
 
 
 ## Directories ## 
-setwd("C:/Users/p/Documents/R Programming/denver-crime-data")
+setwd("C:/Users/taylo/Documents/R Programming/denver-crime-data")
 
 
 ## Reading in the Data ## 
@@ -100,10 +105,69 @@ all_dates <- test %>% select(REPORTED_DATE, IS_CRIME, DISTRICT_ID) %>% group_by(
 
 ggplot(all_dates,aes(x= REPORTED_DATE, y= CRIME)) + geom_area(aes(color= DISTRICT_ID, fill = DISTRICT_ID), alpha= .5)
  
-## Mapping to a map ## 
-setwd("C:/Users/p/Documents/R Programming/denver-crime-data/Maps")
+## Mapping to county boundary ## 
+setwd("C:/Users/taylo/Documents/R Programming/denver-crime-data/Maps")
 map <- sf::st_read("county_boundary.shp")
+
+
+
 
 pdf("Map.pdf")
 ggplot() + geom_sf(data = map, color = "black", fill = "red") + coord_sf()
 dev.off()
+
+## Testing mapping the crime points to a map ## 
+  ## Offenses
+
+sample <- denver_crime[sample(1:nrow(denver_crime), 50, replace=FALSE),]
+
+sample <- sample %>% select(OFFENSE_CATEGORY_ID,GEO_LON,GEO_LAT) %>% drop_na(GEO_LON,GEO_LAT)
+denver_map <- st_read("county_boundary.shp")
+
+names(sample)<- c("Offense","Longitude", "Latitude")
+Denver <- leaflet(sample) %>% addProviderTiles("Stamen.Toner") %>%
+    addPolygons(data=denver_map, color = "red") %>% addCircleMarkers(label=~Offense,
+                                                      weight = 3, 
+                                                      radius=10, 
+                                                      color="blue") 
+Denver
+  ## Districts
+new_sample <- denver_crime[sample(1:nrow(denver_crime), 50, replace=FALSE),]
+
+new_sample <- new_sample %>% select(GEO_LON,GEO_LAT, DISTRICT_ID) %>% drop_na(GEO_LAT,GEO_LON)
+names(new_sample)<- c("Longitude", "Latitude","District")
+new_sample$District <- as.character(new_sample$District)
+new_Denver <- leaflet(new_sample) %>% addProviderTiles("Stamen.Toner") %>%
+    addPolygons(data=denver_map, color= "red") %>% addCircleMarkers(label=~District,weight=3,
+                                                                    radius=5,color="blue")
+
+
+new_Denver
+
+  ## Full data 
+full_denver <- test %>% filter(REPORTED_YEAR == "2018" & REPORTED_MONTH == "1")
+
+full_denver <- full_denver %>% select(GEO_LON, GEO_LAT, OFFENSE_CATEGORY_ID) %>% drop_na(GEO_LON,GEO_LAT)
+names(full_denver)<- c("Longitude","Latitude","Offense")
+full_denver$Offense <- as.factor(full_denver$Offense)
+color_fact <- colorFactor(palette = c('lightsalmon3',
+                                      'lightsalmon4',
+                                      'lightseagreen',
+                                      'lightskyblue',
+                                      'lightskyblue1',
+                                      'lightskyblue3',
+                                      'mediumpurple3',
+                                      'mediumpurple4',
+                                      'mediumseagreen',
+                                      'mediumslateblue',
+                                      'mediumspringgreen',
+                                      'mediumturquoise',
+                                      'mediumvioletred',
+                                      'midnightblue',
+                                      'mintcream'), 
+                          domain = full_denver$Offense)
+full_map <- leaflet(full_denver) %>% addProviderTiles("Stamen.Toner") %>% 
+    addPolygons(data=denver_map,color = "red") %>% addCircles(label=~Offense,
+                                                                    weight= 3,
+                                                                    radius=10, color = ~color_fact(Offense), fill=TRUE)
+full_map
