@@ -18,7 +18,7 @@ library(htmltools)
 
 
 ## Directories ## 
-setwd("C:/Users/taylo/Documents/R Programming/denver-crime-data")
+setwd("C:/Users/p/Documents/R Programming/denver-crime-data")
 
 
 ## Reading in the Data ## 
@@ -106,7 +106,7 @@ all_dates <- test %>% select(REPORTED_DATE, IS_CRIME, DISTRICT_ID) %>% group_by(
 ggplot(all_dates,aes(x= REPORTED_DATE, y= CRIME)) + geom_area(aes(color= DISTRICT_ID, fill = DISTRICT_ID), alpha= .5)
  
 ## Mapping to county boundary ## 
-setwd("C:/Users/taylo/Documents/R Programming/denver-crime-data/Maps")
+setwd("C:/Users/p/Documents/R Programming/denver-crime-data/Maps")
 map <- sf::st_read("county_boundary.shp")
 
 
@@ -171,3 +171,15 @@ full_map <- leaflet(full_denver) %>% addProviderTiles("Stamen.Toner") %>%
                                                                     weight= 3,
                                                                     radius=10, color = ~color_fact(Offense), fill=TRUE)
 full_map
+
+## Analysis / Models 
+  ## Difference between districts by year? 
+  denv <- test %>% select(IS_CRIME,DISTRICT_ID,REPORTED_YEAR) %>% filter(REPORTED_YEAR != "2019") %>% group_by(DISTRICT_ID,REPORTED_YEAR) %>% summarize(CRIME = sum(IS_CRIME))
+  
+  levels(denv$DISTRICT_ID)
+  denv$DISTRICT_ID <- ordered(denv$DISTRICT_ID, levels=c("1", "2", "3", "4", "5", "6", "7"))  
+res.aov <- aov(CRIME ~ DISTRICT_ID, data = denv)  
+summary(res.aov)
+TukeyHSD(res.aov)
+plot(res.aov,2)
+plot(res.aov,1)
