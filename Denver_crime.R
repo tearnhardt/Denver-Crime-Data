@@ -169,9 +169,26 @@ color_fact <- colorFactor(palette = c('lightsalmon3',
 full_map <- leaflet(full_denver) %>% addProviderTiles("Stamen.Toner") %>% 
     addPolygons(data=denver_map,color = "red") %>% addCircles(label=~Offense,
                                                                     weight= 3,
-                                                                    radius=10, color = ~color_fact(Offense), fill=TRUE)
+                                                                    radius=10, color = ~color_fact(Offense), fill=TRUE,opacity= .2)
 full_map
 
+## Police Precincts
+precincts <- st_read("police_precincts.shp")
+
+police_prec_map <- leaflet(full_denver) %>% addProviderTiles("Stamen.Toner") %>% 
+  addPolygons(data=denver_map,color = "red") %>% addPolygons(data=precincts, color= "blue") %>% addCircles(label=~Offense,
+                                                            weight= 3,
+                                                            radius=10, color = ~color_fact(Offense), fill=TRUE,opacity= .4)
+police_prec_map
+
+## Street Lamps 
+lamps <- st_read("street_light_poles.shp")
+
+lamps_map <- leaflet(full_denver) %>% addProviderTiles("Stamen.Toner") %>% 
+  addPolygons(data=denver_map,color = "red") %>% addCircles(data= lamps, color = "yellow") %>% addCircles(label=~Offense,
+                                                            weight= 3,
+                                                            radius=10, color = ~color_fact(Offense), fill=TRUE,opacity= .2)
+lamps_map
 ## Analysis / Models 
   ## Difference between districts by year? 
   denv <- test %>% select(IS_CRIME,DISTRICT_ID,REPORTED_YEAR) %>% filter(REPORTED_YEAR != "2019") %>% group_by(DISTRICT_ID,REPORTED_YEAR) %>% summarize(CRIME = sum(IS_CRIME))
