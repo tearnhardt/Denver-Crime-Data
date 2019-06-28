@@ -51,7 +51,7 @@ date <- function(chr,dataset){
 
 
 
-test$REPORTED_DATE <- date(test$REPORTED_DATE,test)
+test$REPORTED_DATE_NT <- date(test$REPORTED_DATE,test)
 
 ## Getting the month and year ## 
 year <- function(chr,dataset){
@@ -66,7 +66,7 @@ year <- function(chr,dataset){
   return(year)
 }
 
-test$REPORTED_YEAR<-year(test$REPORTED_DATE, test)
+test$REPORTED_YEAR<-year(test$REPORTED_DATE_NT, test)
 
 month <- function(chr,dataset){
   vector <- chr 
@@ -79,8 +79,26 @@ month <- function(chr,dataset){
   return(month)
 }
 
-test$REPORTED_MONTH<-month(test$REPORTED_DATE, test)
+test$REPORTED_MONTH<-month(test$REPORTED_DATE_NT, test)
 
+## Getting the time 
+time <- function(chr,dataset) {
+  vector <- chr 
+  x <- nrow(dataset)
+  time <- 1:x
+  for(i in 1:x) {
+    time[i] <- substring(vector[i],8)
+    for(j in 1:19) {
+      s <- as.character(j)
+      symbol <- paste(s, "")
+      time[i] <- gsub(symbol,"", time[i])
+    }
+    
+    }
+  return(time)
+}
+
+test$REPORTED_TIME <- time(test$REPORTED_DATE, test)
 
 ## General Plots ## 
 test$REPORTED_YEAR <- as.factor(test$REPORTED_YEAR)
@@ -184,10 +202,10 @@ police_prec_map
 ## Street Lamps 
 lamps <- st_read("street_light_poles.shp")
 
-lamps_map <- leaflet(full_denver) %>% addProviderTiles("Stamen.Toner") %>% 
-  addPolygons(data=denver_map,color = "red") %>% addCircles(data= lamps, color = "yellow") %>% addCircles(label=~Offense,
+lamps_map <- leaflet(new_sample) %>% addProviderTiles("Stamen.Toner") %>% 
+  addPolygons(data=denver_map,color = "red") %>% addCircles(data= lamps, weight= 2, color = "yellow", opacity= .2) %>% addCircles(label=~District,
                                                             weight= 3,
-                                                            radius=10, color = ~color_fact(Offense), fill=TRUE,opacity= .2)
+                                                            radius=10, color = "purple", fill=TRUE,)
 lamps_map
 ## Analysis / Models 
   ## Difference between districts by year? 
